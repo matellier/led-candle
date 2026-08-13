@@ -1,5 +1,7 @@
 #include <Adafruit_NeoPixel.h>
 
+// simple led flicker with inductor coil to flicker candle
+
 #define LED_PIN 6
 #define COIL_PIN 7  // solenoid/inductor coil (100mH/300ohm), driven directly from GPIO — flyback diode across coil, no transistor
 
