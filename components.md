@@ -8,6 +8,7 @@
 | 5mm white LED, diffused | Vf 2.0–3.2 V, If 20 mA max | Long lead = anode (+) |
 | Resistor | 150 Ω 1/4 W (220 Ω acceptable) | Series with LED |
 | Filament | White PETG, clear PETG | Prusa printer; starting 15% infill |
+| WS2812B strip | 5 V addressable RGB (density TBD) | Stage 5 LED. On hand
 | 2nd LED + resistor | Same 5mm white LED, 150 Ω | Stage 3 side-by-side comparison on D10 |
 
 ## Stage 4 (planned)

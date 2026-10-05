@@ -26,10 +26,11 @@ Each stage ends with a short note in `experiments/` saying what worked and what 
 - [x] Log what looks most like a real flame → `experiments/flicker-algorithms/stage2-results.md`
 - [ ] Fine-tune mode 3 inside the flame print (carries into Stage 3)
 
-## Stage 3 — Diffuser / flame print experiments ← **current**
+## Stage 3 — Diffuser / flame print experiments ⏸ (resumes after Stage 5)
 - [x] Side-by-side sketch: `firmware/arduino/stage3_compare/` (A=D9, B=D10; cycles both → A → B, 10 s each)
 - [x] Schematic: `hardware/schematics/stage3-two-led-compare.md`
-- [ ] Test 1: white PETG (A) vs clear PETG (B), same flame model
+- [x] Test 1: white PETG (A) vs clear PETG (B), same flame model → 5mm LED too dim at 50 ft either way
+      (`experiments/diffusion-tests/stage3-results.md`). **Diffuser tests paused until Stage 5 picks the LED.**
 
 Change **one variable at a time**, holding the others fixed. Baseline: white PETG, 15% infill, same flame model.
 
@@ -48,20 +49,33 @@ exposure**, in a dark room plus once from outside through the window. Record in 
 Expect wall count and wall thickness to matter more than infill %. Light mostly passes through the
 outer walls, and dense infill mostly adds hot spots and shadows.
 
-## Stage 4 — 4-pin RGB LED
+## Stage 4 — 4-pin RGB LED ⏭ skipped (superseded by WS2812B in Stage 5)
 - [ ] Identify common-anode vs common-cathode (multimeter diode test)
 - [ ] Wire R/G/B to D9/D10/D11, one resistor per color
 - [ ] Color presets: warm white candle, red, green, orange, blue, purple, plus holiday cycles
 - [ ] Flicker applied to the color mix (brightness flicker + slight hue shift toward orange)
 - [ ] Re-run the best Stage 3 diffuser with RGB. RGB LEDs often show color fringing that the print has to blend
 
-## Stage 5 — Brightness decision ("visible from the sidewalk")
-A single 5 mm LED at ~13 mA may be too dim through a diffuser behind window glass. Test the best
-5 mm result outside at dusk **and** after full dark. If too dim, move to (recommended order):
-1. **SK6812 RGBW addressable LED** (NeoPixel family). A true white channel gives a warm candle color, there's
-   one data pin, and full color. Trade-off: about 1 mA quiescent draw even when "off" → needs a power-cut
-   transistor for battery life.
-2. High-brightness LED + MOSFET driver (e.g. 0.5–1 W warm white). Brightest, but white only.
+## Stage 5 — Brightness: move to addressable LEDs ← **current**
+Decided 2026-10-05: 5mm LEDs can't be seen well from the sidewalk. Moving to **WS2812B 5V** (on hand).
+- Candle color = RGB amber mix (R high, G ~40–50%, B ~0); holiday colors come for free
+- One data pin for any number of pixels; same Adafruit_NeoPixel library as `candle_flicker1.ino`
+- Runs directly from one 18650 (WS2812B rated 3.5–5.3 V)
+- Trade-off: no true warm white. If a white mode is wanted, **SK6812 RGBW "WW"** is a drop-in upgrade (`NEO_GRBW`)
+- Rejected: three 5mm LEDs in one flame (still dim); 12V 5050 strip (needs 12V → 3 cells or a booster)
+
+Prototype circuit (Uno): D6 → 330 Ω → strip DIN; strip 5V/GND from the Uno 5V/GND; 470–1000 µF cap across 5V/GND;
+brightness capped in code to stay within USB current.
+
+**Open questions (answer before writing the sketch):**
+- [ ] Parts on hand: 330 Ω (220–470 OK) resistor? 470–1000 µF / ≥6.3 V capacitor?
+- [ ] Flame cavity inside size (W × H): decides straight 3–4 pixel segment vs wrapped around a post
+- [ ] WS2812B strip density: 30 / 60 / 144 pixels per meter?
+
+Next:
+- [ ] Sketch: amber mode 3 flicker on 1 / 3 / 4 pixels, selectable over serial
+- [ ] Sidewalk test at ~50 ft (dusk and full dark): how many pixels it takes
+- [ ] Measure current draw at the chosen pixel count (feeds the Stage 7 battery sizing)
 
 ## Stage 6 — Candle body
 - [ ] Full candle shell, flame mount, top/cap
@@ -70,7 +84,9 @@ A single 5 mm LED at ~13 mA may be too dim through a diffuser behind window glas
 
 ## Stage 7 — Power, sensing, and the small controller
 - [ ] Move off the Uno to a small, low-power controller (ATtiny85 or 3.3 V Pro Mini). Sleep between flicker updates
-- [ ] Battery choice sized from measured current. Measure real mA in Stage 5 before picking
+- [ ] Battery: **18650** (leaning). Name-brand protected cells, removable + external charger (not charged inside the candle).
+      Estimate: 4 px amber flicker ≈ 60 mA → ~8 nights at 6 h/night per 3000 mAh cell; full color ≈ 2 nights
+- [ ] Power-cut transistor for the LEDs (WS2812B draws ~1 mA/pixel even when dark)
 - [ ] On/off: **photocell at dusk + 6-hour run timer** (classic window-candle behavior), with optional manual switch
 - [ ] Battery life target (TBD, e.g. a full holiday season on one set)
 
@@ -86,6 +102,6 @@ A single 5 mm LED at ~13 mA may be too dim through a diffuser behind window glas
 |----------|-------|------------------------|
 | Flicker algorithm | 2 | ✅ Mode 3: smooth walk + flutter + gusts |
 | RGB LED type | 4 | Whatever is on hand; common-cathode is simpler to code |
-| Final LED | 5 | SK6812 RGBW if the 5 mm LED is too dim |
+| Final LED | 5 | ✅ WS2812B (on hand); SK6812 RGBW WW if a true white is wanted |
 | Controller | 7 | ATtiny85 (cheap, tiny, enough PWM for 1 addressable LED) |
-| Battery | 7 | Decide after measuring current |
+| Battery | 7 | 18650, protected, removable; confirm after measuring current |
