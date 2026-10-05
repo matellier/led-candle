@@ -20,13 +20,17 @@ Each stage ends with a short note in `experiments/` saying what worked and what 
 - [x] Wire D9 → 150 Ω → LED → GND; confirm it lights (150 Ω, lit)
 - [ ] Draw schematic in KiCad (`hardware/schematics/`)
 
-## Stage 2 — Flicker ← **current**
+## Stage 2 — Flicker ✅
 - [x] PWM flicker on D9, non-blocking (`millis()`), tunable constants — `firmware/arduino/stage2_flicker/`
 - [x] Compare 3 flicker modes by eye (1 random jump, 2 smooth walk, 3 smooth + flutter + gusts) — switch via serial `1`/`2`/`3` → **mode 3 chosen**
 - [x] Log what looks most like a real flame → `experiments/flicker-algorithms/stage2-results.md`
 - [ ] Fine-tune mode 3 inside the flame print (carries into Stage 3)
 
-## Stage 3 — Diffuser / flame print experiments
+## Stage 3 — Diffuser / flame print experiments ← **current**
+- [x] Side-by-side sketch: `firmware/arduino/stage3_compare/` (A=D9, B=D10; cycles both → A → B, 10 s each)
+- [x] Schematic: `hardware/schematics/stage3-two-led-compare.md`
+- [ ] Test 1: white PETG (A) vs clear PETG (B), same flame model
+
 Change **one variable at a time**, holding the others fixed. Baseline: white PETG, 15% infill, same flame model.
 
 | Variable | Values to try |

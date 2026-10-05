@@ -7,7 +7,8 @@
 | Arduino Uno (clone) | ATmega328P, CH340 USB → `/dev/ttyUSB0` | Upload via `arduino-cli`, FQBN `arduino:avr:uno` |
 | 5mm white LED, diffused | Vf 2.0–3.2 V, If 20 mA max | Long lead = anode (+) |
 | Resistor | 150 Ω 1/4 W (220 Ω acceptable) | Series with LED |
-| Filament | White PETG | Prusa printer; starting 15% infill |
+| Filament | White PETG, clear PETG | Prusa printer; starting 15% infill |
+| 2nd LED + resistor | Same 5mm white LED, 150 Ω | Stage 3 side-by-side comparison on D10 |
 
 ## Stage 4 (planned)
 
