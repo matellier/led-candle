@@ -58,7 +58,7 @@ outer walls, and dense infill mostly adds hot spots and shadows.
 
 ## Stage 5 — Brightness: move to addressable LEDs ← **current**
 Decided 2026-10-05: 5mm LEDs can't be seen well from the sidewalk. Moving to **WS2812B 5V** (on hand).
-- Strip on hand: **144 LED/m** WS2812B, uncut on the reel. Pixels wrap in a spiral around an **18 mm printed post**.
+- Strip on hand: **144 LED/m** WS2812B, uncut on the reel. Pixels wrap in a spiral around an **~16 mm printed post**.
   Post height is sized to the pixel count the sidewalk test picks
 - Candle color = RGB amber mix (R high, G ~40–50%, B ~0); holiday colors come for free
 - Trade-off: no true warm white. If a white mode is wanted, **SK6812 RGBW "WW"** is a drop-in upgrade
@@ -76,14 +76,15 @@ Full wiring + WLED setup: `hardware/schematics/stage5-ws2812b-post.md`.
 
 **Open questions:**
 - [x] Strip density → 144/m
-- [x] Flame layout → wrapped around an 18 mm post
+- [x] Flame layout → wrapped around a ~16 mm post
 - [x] Data resistor on hand → 150 Ω
-- [ ] 470–1000 µF / ≥6.3 V capacitor on hand?
+- [x] 470–1000 µF / ≥6.3 V capacitor on hand → 470 µF 16 V
 - [ ] Does the ESP32's 3.3 V data drive the strip reliably, or does it need a 74AHCT125 level shifter?
+- [x] Why does connecting the breadboard 5V stop the ESP32 from booting? → Ground was on the CMD (flash) terminal next to 5V, not GND
 
 Next:
 - [ ] Wrap ~20 uncut pixels on the test post; wire to the on-hand ESP32 (P16 / 5V / GND)
-- [ ] Flash WLED; set the LED count (20), GPIO 16 and the 500 mA current limit
+- [ ] Flash WLED; set the LED count (17), GPIO 16 and the 500 mA current limit
 - [ ] Use the WLED LED count to compare 4 / 8 / 12 / 15 lit
 - [ ] Sidewalk test at ~50 ft (dusk and full dark): pick the pixel count and brightness
 - [ ] Measure current draw at the chosen count and brightness, which sets the charger rating
@@ -100,6 +101,15 @@ Next:
 
 ## Stage 7 — Candle body
 - [ ] Post height sized to the chosen pixel count; flame diffuser over it (resume the Stage 3 tests here)
+- [ ] Diffuser test 1, LED-to-diffuser gap: vase-mode white PETG cylinder over the post (MK4, 0.6 mm nozzle,
+      ~0.8 mm wall, bottom solid layers = 0). Print **30 mm** and **36 mm** ID (32 mm optional), photograph them per the
+      Stage 3 method, and log the results in `experiments/diffusion-tests/`
+      - Rule of thumb: even light once gap ≈ LED spacing (Moreno, Applied Optics 2006). Spacing here is 6.9 mm along
+        the strip and ~10 mm between spiral turns
+      - Model (`experiments/diffusion-tests/gap_model.py`, run with `uv run --with numpy python gap_model.py`).
+        Brightness variation on the diffuser: 5 mm gap (30 mm ID) 28%, 6 mm 17%, **8 mm (36 mm ID) 8%**,
+        10 mm 6%. Expect ~8 mm to be the sweet spot. The model ignores the wall's own scattering, so real prints look smoother
+      - FreeCAD: a solid cylinder, OD = ID + 2 × wall (e.g. 37.6 mm for a 36 mm ID). Vase mode hollows it
 - [ ] Base enclosure for the production board with the USB port reachable and a cable exit
 - [ ] Full candle shell, top/cap
 
@@ -117,7 +127,7 @@ Parts list for 12: `components.md` (buy only after the prototype works).
 |----------|-------|------------------------|
 | Flicker algorithm | 2 | ✅ Mode 3: smooth walk + flutter + gusts (WLED effect may replace it, see Stage 5) |
 | RGB LED type | 4 | Skipped |
-| Final LED | 5 | ✅ WS2812B 144/m, wrapped around an 18 mm post; SK6812 RGBW WW if a true white is wanted |
+| Final LED | 5 | ✅ WS2812B 144/m, wrapped around a ~16 mm post; SK6812 RGBW WW if a true white is wanted |
 | Pixel count per candle | 5 | Sidewalk test; expect 8–15 |
 | Controller | 5 | ✅ ESP32 + WLED (2026-10-10). Prototype on the on-hand ESP32-WROOM-32 DevKit; production leaning ESP32-C3 Super Mini. Pro Mini 328 / ATtiny85 shelved |
 | Firmware | 6 | WLED; ESPHome + mode 3 as fallback |

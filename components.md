@@ -11,9 +11,9 @@ Goal: one working candle on parts already owned, before buying anything for the 
 | WS2812B strip | 5 V addressable RGB, **144 LED/m**, uncut reel | Pads `+5V DIN GND`. Factory JST SM 3-pin pigtail: red = 5V, white = GND, green = DIN, plus loose thick red/white power leads |
 | Spare JST SM 3-pin pigtail | Mates with the strip connector | Bare ends go straight into the screw terminals |
 | Resistor | 150 Ω 1/4 W | Data line series resistor (330 Ω is the textbook value; 150 Ω is fine for a short wire) |
-| Flame post | 3D-printed, 18 mm diameter | Strip wraps around it in a spiral |
+| Flame post | 3D-printed, ~16 mm diameter (LED faces ~20 mm) | Strip wraps around it in a spiral |
 | Filament | White PETG, clear PETG | Prusa printer; starting 15% infill |
-| Capacitor (optional) | 470–1000 µF, ≥ 6.3 V electrolytic | Not confirmed on hand. Recommended across 5V/GND, not required at the prototype's capped brightness |
+| Capacitor | 470 µF 16 V electrolytic | Across 5V/GND at the screw terminals, stripe → GND. Not required at the prototype's capped brightness, but on hand so it goes in |
 
 ## Production — 12 candles (buy only after the prototype works)
 
