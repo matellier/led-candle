@@ -10,10 +10,10 @@ Goal: one working candle on parts already owned, before buying anything for the 
 | USB wall charger + cable | 5 V, USB-A → micro-USB | Powers the ESP32 and the strip. Check the charger's amp rating on its label |
 | WS2812B strip | 5 V addressable RGB, **144 LED/m**, uncut reel | Pads `+5V DIN GND`. Factory JST SM 3-pin pigtail: red = 5V, white = GND, green = DIN, plus loose thick red/white power leads |
 | Spare JST SM 3-pin pigtail | Mates with the strip connector | Bare ends go straight into the screw terminals |
-| Resistor | 150 Ω 1/4 W | Data line series resistor (330 Ω is the textbook value; 150 Ω is fine for a short wire) |
+| Resistor | 150 Ω 1/4 W | Not used in the prototype. Spare, for the data line if the first pixel misbehaves |
 | Flame post | 3D-printed, ~16 mm diameter (LED faces ~20 mm) | Strip wraps around it in a spiral |
 | Filament | White PETG, clear PETG | Prusa printer; starting 15% infill |
-| Capacitor | 470 µF 16 V electrolytic | Across 5V/GND at the screw terminals, stripe → GND. Not required at the prototype's capped brightness, but on hand so it goes in |
+| Capacitor | 470 µF 16 V electrolytic | Not used in the prototype. Spare, across 5V/GND (stripe → GND) if needed |
 
 ## Production — 12 candles (buy only after the prototype works)
 

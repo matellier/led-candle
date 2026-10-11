@@ -70,15 +70,14 @@ Decided 2026-10-10: **ESP32 + WLED, powered by a 5V USB charger per candle** (ou
 - WLED gives Home Assistant control, built-in candle/fire effects, multi-candle sync and a current limiter with no custom code
 - The Pro Mini 328s are shelved: no network, and a second board type doubles the firmware work
 
-Prototype circuit (ESP32-WROOM-32 DevKit on screw-terminal breakout, on hand): P16 → 150 Ω → strip DIN; strip 5V/GND
+Prototype circuit (ESP32-WROOM-32 DevKit on screw-terminal breakout, on hand): P16 → strip DIN (no resistor or cap); strip 5V/GND
 from the breakout 5V/GND (micro-USB from a wall charger); WLED current limiter at 500 mA.
 Full wiring + WLED setup: `hardware/schematics/stage5-ws2812b-post.md`.
 
 **Open questions:**
 - [x] Strip density → 144/m
 - [x] Flame layout → wrapped around a ~16 mm post
-- [x] Data resistor on hand → 150 Ω
-- [x] 470–1000 µF / ≥6.3 V capacitor on hand → 470 µF 16 V
+- [x] Data resistor / bulk cap → neither used; the vendor diagram omits them and the prototype works without them
 - [ ] Does the ESP32's 3.3 V data drive the strip reliably, or does it need a 74AHCT125 level shifter?
 - [x] Why does connecting the breadboard 5V stop the ESP32 from booting? → Ground was on the CMD (flash) terminal next to 5V, not GND
 
