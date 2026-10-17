@@ -99,16 +99,22 @@ Next:
 - [ ] Fallback if WLED's candle doesn't look as good as mode 3: **ESPHome** with mode 3 ported to a custom addressable light effect
 
 ## Stage 7 — Candle body
-- [ ] Post height sized to the chosen pixel count; flame diffuser over it (resume the Stage 3 tests here)
-- [ ] Diffuser test 1, LED-to-diffuser gap: vase-mode white PETG cylinder over the post (MK4, 0.6 mm nozzle,
-      ~0.8 mm wall, bottom solid layers = 0). Print **30 mm** and **36 mm** ID (32 mm optional), photograph them per the
-      Stage 3 method, and log the results in `experiments/diffusion-tests/`
-      - Rule of thumb: even light once gap ≈ LED spacing (Moreno, Applied Optics 2006). Spacing here is 6.9 mm along
-        the strip and ~10 mm between spiral turns
-      - Model (`experiments/diffusion-tests/gap_model.py`, run with `uv run --with numpy python gap_model.py`).
-        Brightness variation on the diffuser: 5 mm gap (30 mm ID) 28%, 6 mm 17%, **8 mm (36 mm ID) 8%**,
-        10 mm 6%. Expect ~8 mm to be the sweet spot. The model ignores the wall's own scattering, so real prints look smoother
-      - FreeCAD: a solid cylinder, OD = ID + 2 × wall (e.g. 37.6 mm for a 36 mm ID). Vase mode hollows it
+Decided 2026-10-17: **fin + hairpin strip** replaces the round post. The post needs a ~26 mm diffuser, which
+is too big for the flame. Model: `models/freecad/` (`candle.FCStd`, assembly notes in its README).
+- One **uncut 5 px piece**: 2 px up the street face of a thin printed fin, 1 px on top lighting the tip, 2 px
+  down the room face. No wiring inside the flame, nothing blocking light, DIN wired at the base only
+- Flame width ≈ LED footprint + 2 × gap. Only the street and room faces carry LEDs, so the diffuser is
+  **~18 mm wide** seen from the street (23 mm front-to-back) instead of 26 mm round
+- Rejected: LEDs in the base feeding the flame through a light pipe or fiber. Light from a large area can't be
+  squeezed into a small flame (étendue). A 4×4 array into a ~12 mm flame keeps ≤10%
+- Below ~16 mm would need a narrower 5 mm strip with smaller pixels. Those are usually dimmer
+  (WS2812C‑2020 runs at low current), so check brightness before buying
+- [ ] Bend test on a scrap piece of strip: two 90° bends in the ~2 mm gaps between pixels, without cracking
+- [ ] Sidewalk test first (Stage 5) sets `px_side`. More pixels make the flame taller, not wider
+- [ ] Print base, fin and diffuser from `models/stl/`; check the fin press fit and the diffuser groove fit
+- [ ] Diffuser gap test on the fin: `gap` 5 vs 6 mm, photographed per the Stage 3 method
+- [x] Diffuser test 1 (post): the diffuser needs to be ~5 mm from the LEDs. 6 mm from the strip corner diffuses
+      well, but on a 10 × 10 mm post that means a 26 mm diffuser, no smaller than the spiral wrap → fin design above
 - [ ] Base enclosure for the production board with the USB port reachable and a cable exit
 - [ ] Full candle shell, top/cap
 
@@ -126,7 +132,7 @@ Parts list for 12: `components.md` (buy only after the prototype works).
 |----------|-------|------------------------|
 | Flicker algorithm | 2 | ✅ Mode 3: smooth walk + flutter + gusts (WLED effect may replace it, see Stage 5) |
 | RGB LED type | 4 | Skipped |
-| Final LED | 5 | ✅ WS2812B 144/m, wrapped around a ~16 mm post; SK6812 RGBW WW if a true white is wanted |
+| Final LED | 5 | ✅ WS2812B 144/m, 5 px hairpin over a printed fin (Stage 7); SK6812 RGBW WW if a true white is wanted |
 | Pixel count per candle | 5 | Sidewalk test; expect 8–15 |
 | Controller | 5 | ✅ ESP32 + WLED (2026-10-10). Prototype on the on-hand ESP32-WROOM-32 DevKit; production leaning ESP32-C3 Super Mini. Pro Mini 328 / ATtiny85 shelved |
 | Firmware | 6 | WLED; ESPHome + mode 3 as fallback |
