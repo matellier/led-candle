@@ -1,6 +1,6 @@
 # Stage 5 — WS2812B strip wrapped on the flame post (ESP32 + WLED)
 
-Prototype candle: a **144 LED/m WS2812B** strip wrapped in a spiral around the 3D-printed **~16 mm post**. It's driven by
+Prototype candle: a **60 LED/m WS2812B** strip wrapped in a spiral around the 3D-printed **~16 mm post**. It's driven by
 an **ESP32-WROOM-32 DevKit** on a screw-terminal breakout running **WLED**, and powered from a 5 V USB wall charger.
 
 The strip is still uncut. Wrap ~20 pixels for the sidewalk test, and use WLED's LED count to choose how many are

@@ -58,8 +58,8 @@ outer walls, and dense infill mostly adds hot spots and shadows.
 
 ## Stage 5 — Brightness: move to addressable LEDs ← **current**
 Decided 2026-10-05: 5mm LEDs can't be seen well from the sidewalk. Moving to **WS2812B 5V** (on hand).
-- Strip on hand: **144 LED/m** WS2812B, uncut on the reel. Pixels wrap in a spiral around an **~16 mm printed post**.
-  Post height is sized to the pixel count the sidewalk test picks
+- Strip on hand: **60 LED/m** WS2812B (~16.7 mm per pixel), uncut on the reel. Prototype with it; buy **144/m only if
+  needed**. Flame layout: 4 px hairpin over a printed fin (Stage 7), height set by the pixel count the sidewalk test picks
 - Candle color = RGB amber mix (R high, G ~40–50%, B ~0); holiday colors come for free
 - Trade-off: no true warm white. If a white mode is wanted, **SK6812 RGBW "WW"** is a drop-in upgrade
 - Rejected: three 5mm LEDs in one flame (still dim); 12V 5050 strip (needs 12V → 3 cells or a booster)
@@ -75,7 +75,7 @@ from the breakout 5V/GND (micro-USB from a wall charger); WLED current limiter a
 Full wiring + WLED setup: `hardware/schematics/stage5-ws2812b-post.md`.
 
 **Open questions:**
-- [x] Strip density → 144/m
+- [x] Strip density → 60/m on hand for the prototype; 144/m only if needed
 - [x] Flame layout → wrapped around a ~16 mm post
 - [x] Data resistor / bulk cap → neither used; the vendor diagram omits them and the prototype works without them
 - [ ] Does the ESP32's 3.3 V data drive the strip reliably, or does it need a 74AHCT125 level shifter?
@@ -101,15 +101,17 @@ Next:
 ## Stage 7 — Candle body
 Decided 2026-10-17: **fin + hairpin strip** replaces the round post. The post needs a ~26 mm diffuser, which
 is too big for the flame. Model: `models/freecad/` (`candle.FCStd`, assembly notes in its README).
-- One **uncut 5 px piece**: 2 px up the street face of a thin printed fin, 1 px on top lighting the tip, 2 px
-  down the room face. No wiring inside the flame, nothing blocking light, DIN wired at the base only
+- One **uncut 4 px piece**: 2 px up the street face of a 6 mm printed fin, a 180° bend over the fin's round
+  top, 2 px down the room face. Pixels are ~16.7 mm apart cut to cut, so the bend (~10 mm of strip) fits in the
+  ~11.7 mm of bare strip between px2 and px3 and only the sides are stuck down. No pixel on top: the tip is lit
+  indirectly and will be dimmer than the middle. No wiring inside the flame, DIN wired at the base only
 - Flame width ≈ LED footprint + 2 × gap. Only the street and room faces carry LEDs, so the diffuser is
-  **~18 mm wide** seen from the street (23 mm front-to-back) instead of 26 mm round
+  **~18 mm wide** seen from the street (24 mm front-to-back, 50 mm tall) instead of 26 mm round
 - Rejected: LEDs in the base feeding the flame through a light pipe or fiber. Light from a large area can't be
   squeezed into a small flame (étendue). A 4×4 array into a ~12 mm flame keeps ≤10%
 - Below ~16 mm would need a narrower 5 mm strip with smaller pixels. Those are usually dimmer
   (WS2812C‑2020 runs at low current), so check brightness before buying
-- [ ] Bend test on a scrap piece of strip: two 90° bends in the ~2 mm gaps between pixels, without cracking
+- [ ] Bend test on a scrap piece of strip: one 180° bend over a 3 mm radius between two pixels, without cracking
 - [ ] Sidewalk test first (Stage 5) sets `px_side`. More pixels make the flame taller, not wider
 - [ ] Print base, fin and diffuser from `models/stl/`; check the fin press fit and the diffuser groove fit
 - [ ] Diffuser gap test on the fin: `gap` 5 vs 6 mm, photographed per the Stage 3 method
@@ -132,7 +134,7 @@ Parts list for 12: `components.md` (buy only after the prototype works).
 |----------|-------|------------------------|
 | Flicker algorithm | 2 | ✅ Mode 3: smooth walk + flutter + gusts (WLED effect may replace it, see Stage 5) |
 | RGB LED type | 4 | Skipped |
-| Final LED | 5 | ✅ WS2812B 144/m, 5 px hairpin over a printed fin (Stage 7); SK6812 RGBW WW if a true white is wanted |
+| Final LED | 5 | ✅ WS2812B 60/m (on hand), 4 px hairpin over a printed fin (Stage 7); 144/m only if needed; SK6812 RGBW WW if a true white is wanted |
 | Pixel count per candle | 5 | Sidewalk test; expect 8–15 |
 | Controller | 5 | ✅ ESP32 + WLED (2026-10-10). Prototype on the on-hand ESP32-WROOM-32 DevKit; production leaning ESP32-C3 Super Mini. Pro Mini 328 / ATtiny85 shelved |
 | Firmware | 6 | WLED; ESPHome + mode 3 as fallback |

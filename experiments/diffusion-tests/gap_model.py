@@ -1,4 +1,6 @@
 import numpy as np
+# Retired spiral-post layout (replaced by the fin, see ROADMAP Stage 7). It assumed a 144/m pitch in error:
+# the strip on hand is 60/m (~16.7 mm), so these numbers don't apply to it.
 # 16 WS2812B on a helix: strip at r=8.5 (16mm post + PCB), LED face r=10, 144/m pitch, ~10mm strip width per turn
 r_strip, r_led, pitch, rise_turn, N = 8.5, 10.0, 1000/144, 10.0, 16
 dphi = pitch / r_strip
