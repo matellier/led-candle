@@ -1,5 +1,6 @@
 # Generates candle.FCStd (PartDesign: one Body per part, assembled in place) + print-oriented STLs in ../stl/.
-# Run from this directory:
+# Run it inside the FreeCAD GUI (Macro > Macros... > make_candle.py, or through the MCP bridge) so the file
+# keeps visibility and colours. Headless also works, but FreeCAD then opens the file with every part hidden:
 #   flatpak run --env=CANDLE_DIR=$PWD --command=FreeCADCmd org.freecad.FreeCAD make_candle.py
 # After that, edit dimensions in the `params` spreadsheet inside candle.FCStd and press Recompute.
 # Coordinates: z = 0 is the top surface of the candle base. +y = street side (front), -y = room side.
@@ -10,7 +11,7 @@ import Part
 import Sketcher
 import Mesh
 
-HERE = os.environ.get("CANDLE_DIR", os.getcwd())
+HERE = os.environ.get("CANDLE_DIR") or (os.path.dirname(os.path.abspath(__file__)) if "__file__" in globals() else os.getcwd())
 STL_DIR = os.path.join(HERE, "..", "stl")
 V = App.Vector
 
@@ -29,10 +30,10 @@ PARAMS = [
     ("tenon_d", "6", "fin plug depth into base"),
     ("fit", "0.15", "clearance per side, fin socket"),
     ("gap", "5", "LED face to diffuser"),
-    ("wall", "0.8", "diffuser vase-mode wall"),
+    ("wall", "0.8", "diffuser wall thickness"),
     ("env_d", "=fin_t + 2 * (strip_t + led_h)", "front-to-back depth over the LED faces"),
     ("r_out", "=gap + wall", "diffuser outer = LED envelope offset by this"),
-    ("flame_h", "=fin_h + 22", "diffuser height above base; grows with px_side"),
+    ("flame_h", "=fin_h + 18", "diffuser height above base; grows with px_side"),
     ("skirt_d", "4", "diffuser skirt depth = groove depth"),
     ("groove_clr", "0.3", "clearance per side, diffuser groove"),
     ("body_d", "38", "candle base outer diameter"),
@@ -44,8 +45,16 @@ PARAMS = [
 ]
 
 # flame loft profile: (fraction of flame_h, scale of the rounded-rectangle section)
-PROFILE = [(0.0, 1.0), (0.25, 1.06), (0.55, 1.0), (0.75, 0.65), (0.9, 0.3), (1.0, 0.04)]
+# Evenly spaced, gently changing sections: big jumps make the B-spline loft pinch in near the base.
+PROFILE = [(0.0, 1.0), (0.2, 1.04), (0.4, 1.06), (0.64, 1.0), (0.8, 0.75), (0.92, 0.45), (1.0, 0.05)]
+# cavity: (fraction of flame_h, scale, wall factor). Same sections shrunk by wall * factor; the factor > 1 where
+# the flame tapers keeps the wall normal to the surface ~wall thick. The tip is too small to shrink, so the
+# cavity stops short of it and the last few mm are solid.
+CAVITY = [(0.0, 1.0, 1), (0.2, 1.04, 1), (0.4, 1.06, 1), (0.64, 1.0, 1.05), (0.8, 0.75, 1.15), (0.92, 0.45, 1.4),
+          (0.95, 0.3, 1.6)]
 
+if "candle" in App.listDocuments():
+    App.closeDocument("candle")          # rebuild from scratch; unsaved edits in the open copy are discarded
 doc = App.newDocument("candle")
 sheet = doc.addObject("Spreadsheet::Sheet", "params")
 sheet.set("A1", "name"); sheet.set("B1", "value (mm)"); sheet.set("C1", "note")
@@ -178,6 +187,24 @@ loft = dif.newObject("PartDesign::AdditiveLoft", "Flame")
 loft.Profile = secs[0]
 loft.Sections = secs[1:]
 loft.Ruled = False
+# Hollow it: a real wall-thick shell, open at the bottom for the fin, so it slices right without vase mode.
+# (Thickness can't shell this loft: the near-point tip is tighter than the wall.)
+sk = sketch(dif, "CavitySkirt")
+rrect(sk, extra="-params.wall")
+pk = dif.newObject("PartDesign::Pocket", "CavityOpen")   # through the skirt, opens the bottom
+pk.Profile = sk
+expr(pk, Length="params.skirt_d + 1")
+sk.Visibility = False
+secs = []
+for i, (f, s, k) in enumerate(CAVITY):
+    sk = sketch(dif, f"CavitySection{i}", z=f"params.flame_h * {f}")
+    rrect(sk, str(s), extra=f"-params.wall * {k}")
+    sk.Visibility = False
+    secs.append(sk)
+cav = dif.newObject("PartDesign::SubtractiveLoft", "Cavity")
+cav.Profile = secs[0]
+cav.Sections = secs[1:]
+cav.Ruled = False
 
 # ================= candle base =================
 base = new_body("Base")
@@ -211,7 +238,7 @@ w2, t2 = P["fin_w"] / 2 + P["fit"], P["fin_t"] / 2 + P["fit"]
 rect(sk, -w2, w2, -t2, t2,
      "-(params.fin_w / 2 + params.fit)", "params.fin_w / 2 + params.fit",
      "-(params.fin_t / 2 + params.fit)", "params.fin_t / 2 + params.fit")
-pocket("FinSocket", sk, "params.tenon_d + 0.5")
+pocket("FinSocket", sk, "params.tenon_d")   # fin bottoms out with the strip start flush to the base top
 
 # wire slot right in front of the street-side face, where the strip's DIN pads sit
 sk = sketch(base, "WireSlotSketch")
@@ -271,6 +298,26 @@ strip_ref.Links = ref_parts
 
 doc.recompute()
 
+# Visibility and colours live in the GUI half of the file, so they are only saved when the GUI is up
+if App.GuiUp:
+    import FreeCADGui as Gui
+    gd = Gui.getDocument(doc.Name)
+    for o in doc.Objects:
+        if gd.getObject(o.Name):
+            gd.getObject(o.Name).Visibility = False
+    style = {base: ((0.9, 0.9, 0.87), 0), fin: ((0.35, 0.55, 0.9), 0), dif: ((1.0, 0.92, 0.75), 65)}
+    for o, (colour, transp) in style.items():
+        vo = gd.getObject(o.Name)
+        vo.Visibility = True
+        gd.getObject(o.Tip.Name).Visibility = True   # a Body draws through its Tip feature
+        vo.ShapeColor = colour
+        vo.Transparency = transp
+    for o in ref_parts:   # shown one by one (not via the StripReference compound) so the LEDs get their own colour
+        gd.getObject(o.Name).Visibility = True
+        gd.getObject(o.Name).ShapeColor = (1.0, 0.8, 0.0) if o.Name.startswith("ref_led") else (0.15, 0.6, 0.25)
+    gd.ActiveView.viewIsometric()
+    gd.ActiveView.fitAll()
+
 bad = []
 for o in doc.Objects:
     if o.isDerivedFrom("Sketcher::SketchObject"):
@@ -302,7 +349,7 @@ def export(body, fname, rot=None):
 os.makedirs(STL_DIR, exist_ok=True)
 export(base, "candle_base.stl", rot=180)   # top face on the bed: socket, slot, groove need no supports
 export(fin, "candle_fin.stl")              # upright, plug down
-export(dif, "candle_diffuser.stl")         # skirt down, vase mode
+export(dif, "candle_diffuser.stl")         # skirt down, hollow and open at the bottom
 for k in ("pitch", "bend", "fin_h", "flame_h"):
     print(k, round(sheet.get(k), 2))
 print("bend fits between pixels:", sheet.get("bend") <= sheet.get("pitch") - sheet.get("led_s"))

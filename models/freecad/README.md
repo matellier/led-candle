@@ -4,17 +4,21 @@
 
 | Body | Features |
 |------|----------|
-| `Base` | `BodySketch` → `BodyPad` (down from z = 0), then pockets: `Hollow`, `FinSocket`, `WireSlot`, `Groove`, `UsbNotch` |
+| `Base` | `BodySketch` → `BodyPad` (down from z = 0), then pockets: `Hollow`, `FinSocket` (exactly plug depth, so the fin bottoms out with the strip start flush), `WireSlot`, `Groove`, `UsbNotch` |
 | `Fin` | `FinProfile` (YZ plane: rectangle with a round top) → `FinPad`, symmetric to the plane |
-| `Diffuser` | `SkirtSketch` → `Skirt` pad, then the `Flame` additive loft through `FlameSection0…5` |
+| `Diffuser` | `SkirtSketch` → `Skirt` pad, the `Flame` additive loft through `FlameSection0…6`, then hollowed: `CavityOpen` pocket (opens the bottom) and the `Cavity` subtractive loft through `CavitySection0…6` |
 
 `StripReference` (strip, bend and 5050 packages) is a plain Part compound you don't print. It shows where the
 LEDs sit. Every sketch is fully constrained, and its dimensions come from the `params` spreadsheet. The fin
 size therefore also sizes the socket in the base and the diffuser around it. Edit a value, press Recompute
 (Ctrl+R), then export each Body as an STL again.
 
-The diffuser is a solid, because vase mode hollows it at print time. Set its Transparency to ~60 in the GUI
-to see the fin inside.
+The diffuser is a real hollow shell, open at the bottom, with a `wall` (0.8 mm) wall. It slices correctly
+in normal mode, with no infill and no bottom, so it doesn't depend on vase mode. The cavity uses the flame
+sections shrunk by `wall`, slightly more where the flame tapers so the wall stays ~0.8 mm (0.76–0.88 mm
+measured). The top ~2 mm of the tip is solid, because it's too narrow to hollow. PartDesign Thickness can't
+shell this loft, which is why the cavity is cut explicitly (`CAVITY` in `make_candle.py`). It's shown 65%
+transparent so the fin and LEDs are visible inside.
 
 | File | What |
 |------|------|
@@ -23,8 +27,11 @@ to see the fin inside.
 | `check_fit.py` | Prints the LED-to-diffuser gaps, checks the bend fits between pixels and that no parts overlap |
 | `../stl/candle_*.stl` | Print-oriented exports |
 
+Rebuild **inside the FreeCAD GUI**: Macro → Macros… → pick `make_candle.py` → Execute (or run it through the
+MCP bridge). Visibility and colours are stored in the GUI half of the file, so a headless rebuild opens with
+every part hidden. The fit check runs fine headless:
+
 ```
-flatpak run --env=CANDLE_DIR=$PWD --command=FreeCADCmd org.freecad.FreeCAD make_candle.py
 flatpak run --command=FreeCADCmd org.freecad.FreeCAD check_fit.py
 ```
 
@@ -33,10 +40,10 @@ flatpak run --command=FreeCADCmd org.freecad.FreeCAD check_fit.py
 ```
   side view (cut front-to-back)                  top of the base
 
-            ╱╲   diffuser (vase mode)            ┌──────────────────┐
+            ╱╲   diffuser (0.8 mm shell)         ┌──────────────────┐
            ╱  ╲                                  │   ╭──────────╮   │ ← groove: diffuser skirt
           │ ╭─╮ │ ← 180° bend, no pixel          │   │  ┌────┐  │   │   drops in, 4 mm deep
-          │▓│█│▓│ ← px2 / px3                    │   │  │fin │  │   │ ← fin socket, 6.5 mm deep
+          │▓│█│▓│ ← px2 / px3                    │   │  │fin │  │   │ ← fin socket, 6 mm deep  
           │ │█│ │                                │   │  └────┘  │   │
           │▓│█│▓│ ← px1 / px4                    │   │  ▭▭▭▭    │   │ ← wire slot (street side)
   ════════╪╧═█═╧╪════════ base top (z = 0)       │   ╰──────────╯   │
@@ -66,16 +73,18 @@ flatpak run --command=FreeCADCmd org.freecad.FreeCAD check_fit.py
 |------|-------------|----------|----------|
 | Base | Upside down: top face on the bed (the STL is already flipped), so the socket, slot and groove need no supports | White PETG (the top glows a little, like wax next to a flame) | 2–3 perimeters, 15% infill |
 | Fin | Upright, plug down, round top up | Any (hidden) | 100% infill. It's only 6 mm thick |
-| Diffuser | Skirt down | White PETG | **Vase mode**, bottom solid layers = 0, wall ≈ `wall` (0.8 mm). Gives a 0.8 mm tube that fits the groove |
+| Diffuser | Skirt down | White PETG | Normal mode: 1 perimeter (0.8 mm extrusion width = `wall`), no supports. The STL is already hollow and open at the bottom. Vase mode also works |
 
 ## Current dimensions (`px_side` = 2, pitch 1000/60)
 
-- Diffuser: **~18.3 mm wide seen from the street or room**, 24 mm front-to-back, 50 mm above the base
-  (54 mm with skirt). The round post design needed 26 mm.
+- Diffuser: **~17.7 mm wide seen from the street or room**, 23.2 mm front-to-back, 46 mm above the base
+  (50 mm with skirt). The round post design needed 26 mm. The tip is rounded and sits ~14 mm above the
+  bend, which keeps the unlit top of the flame short.
 - Fin: 9.5 × 6 mm, 31 mm above the base plus the 6 mm plug.
-- LED-to-wall gap (from `check_fit.py`): 4.7 mm at px1/px4 and 4.8 mm at px2/px3. The loft dips slightly
-  between sections. Raise `gap` to 5.3 to get a true 5 mm, or to 6 to match the 6 mm corner gap that diffused
-  well in the post test. The bend is 1.7 mm from the wall where the flame tapers. It has no LEDs on it,
-  so that's fine.
+- LED-to-wall gap (from `check_fit.py`): 5.3 mm at px1/px4 and 5.2 mm at px2/px3. Raise `gap` to 6 to match
+  the 6 mm corner gap that diffused well in the post test. The bend is 2.2 mm from the wall where the flame
+  tapers. It has no LEDs on it, so that's fine.
+- The loft sections are evenly spaced and change gently (`PROFILE` in `make_candle.py`). Big jumps between
+  sections make the B-spline loft pinch in near the base, which earlier cut the px1 gap to 4.7 mm.
 - Diffuser cross-section is the LED envelope offset by `gap` with rounded corners, not an ellipse. An ellipse
   of the same width curves in toward the LED corners, leaving only ~3.6 mm there.

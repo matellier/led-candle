@@ -106,7 +106,7 @@ is too big for the flame. Model: `models/freecad/` (`candle.FCStd`, assembly not
   ~11.7 mm of bare strip between px2 and px3 and only the sides are stuck down. No pixel on top: the tip is lit
   indirectly and will be dimmer than the middle. No wiring inside the flame, DIN wired at the base only
 - Flame width ≈ LED footprint + 2 × gap. Only the street and room faces carry LEDs, so the diffuser is
-  **~18 mm wide** seen from the street (24 mm front-to-back, 50 mm tall) instead of 26 mm round
+  **~18 mm wide** seen from the street (23 mm front-to-back, 46 mm tall) instead of 26 mm round
 - Rejected: LEDs in the base feeding the flame through a light pipe or fiber. Light from a large area can't be
   squeezed into a small flame (étendue). A 4×4 array into a ~12 mm flame keeps ≤10%
 - Below ~16 mm would need a narrower 5 mm strip with smaller pixels. Those are usually dimmer
