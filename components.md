@@ -8,6 +8,7 @@ Goal: one working candle on parts already owned, before buying anything for the 
 |------|------|-------|
 | ESP32 DevKit | ESP32-WROOM-32, 38-pin, micro-USB | Mounted on a green screw-terminal breakout board (terminals labelled `5V`, `GND`, `P16`, …). Runs WLED |
 | USB wall charger + cable | 5 V, USB-A → micro-USB | Powers the ESP32 and the strip. Check the charger's amp rating on its label |
+| USB-C breakout | DIANN 5-pack (ASIN B0BLSN5PR8), 22 × 12 mm, 3 A, pins `VBUS GND CC1 D- D+ CC2` | Power input. Has 5.1 kΩ CC pull-downs (marked `512`), so any USB-C charger gives 5 V. Wire VBUS → 5V and GND → GND, and leave the rest unconnected |
 | WS2812B strip | 5 V addressable RGB, **60 LED/m** (~16.7 mm per pixel, cut to cut), uncut reel | Pads `+5V DIN GND`. Factory JST SM 3-pin pigtail: red = 5V, white = GND, green = DIN, plus loose thick red/white power leads |
 | Spare JST SM 3-pin pigtail | Mates with the strip connector | Bare ends go straight into the screw terminals |
 | Resistor | 150 Ω 1/4 W | Not used in the prototype. Spare, for the data line if the first pixel misbehaves |
